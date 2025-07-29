@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Monitoring Baterai Tensimeter</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/1033/1033920.png">
+  <style>
+    body {
+      background: #e0e5ec;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      transition: background 0.4s, color 0.4s;
+    }
+
+    .dark-mode {
+      background: #1f2937;
+      color: #f9fafb;
+    }
+
+    .neumorph {
+      background: #e0e5ec;
+      border-radius: 30px;
+      box-shadow: 10px 10px 30px #bec4d1, -10px -10px 30px #ffffff;
+      transition: box-shadow 0.3s, background 0.3s;
+    }
+
+    .dark-mode .neumorph {
+      background: #374151;
+      box-shadow: 10px 10px 30px #111827, -10px -10px 30px #4b5563;
+    }
+
+    .inner-shadow {
+      box-shadow: inset 5px 5px 10px #bec4d1, inset -5px -5px 10px #ffffff;
+    }
+
+    .dark-mode .inner-shadow {
+      box-shadow: inset 5px 5px 10px #111827, inset -5px -5px 10px #4b5563;
+    }
+
+    .typography-strong {
+      font-family: 'Georgia', serif;
+      font-weight: bold;
+    }
+
+    .toggle-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: #4b5563;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .dark-mode .toggle-btn {
+      background-color: #d1d5db;
+      color: #111827;
+    }
+
+    /* Text colors adapt */
+    .light-text {
+      color: #1f2937;
+    }
+
+    .dark-mode .light-text {
+      color: #f9fafb;
+    }
+
+    .artistic-bg {
+      background: linear-gradient(135deg, #cbd5e1, #f1f5f9);
+    }
+
+    .dark-mode .artistic-bg {
+      background: linear-gradient(135deg, #111827, #1f2937);
+    }
+
+    .illustration-icon {
+      filter: drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.3));
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center font-sans artistic-bg">
+  <button class="toggle-btn" onclick="toggleDarkMode()">🌓 Mode</button>
+
+  <div class="w-full max-w-md p-6 neumorph">
+    <div class="flex items-center gap-4 mb-6">
+      <img src="https://cdn-icons-png.flaticon.com/512/2877/2877357.png" class="w-16 h-16 illustration-icon" alt="Icon">
+      <h1 class="text-3xl font-extrabold text-blue-800 tracking-tight typography-strong light-text">Baterai Tensimeter</h1>
+    </div>
+
+    <div id="alert" class="hidden mb-4 p-4 rounded-xl inner-shadow text-red-700 font-semibold text-center light-text">
+      ⚠️ Tegangan baterai rendah! Segera ganti atau isi ulang baterai.
+    </div>
+
+    <div class="p-6 space-y-6 rounded-xl inner-shadow">
+      <div class="flex flex-col items-center">
+        <span class="text-blue-700 font-semibold text-xl light-text">🔋 Status</span>
+        <span id="status" class="text-3xl font-bold text-gray-800 light-text">Memuat...</span>
+      </div>
+
+      <div class="flex flex-col items-center">
+        <span class="text-blue-700 font-semibold text-xl light-text">⚡ Tegangan</span>
+        <span id="tegangan" class="text-5xl font-extrabold text-gray-800 light-text">--</span>
+        <span class="text-base text-gray-500 light-text">Volt</span>
+      </div>
+    </div>
+
+    <div class="mt-6 text-center text-sm text-gray-500 light-text">
+      © 2025 <span class="font-semibold text-blue-700">IHIA</span>
+    </div>
+  </div>
+
+  <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "",
+      authDomain: "",
+      databaseURL: "https://monitoringbat-aac5b-default-rtdb.firebaseio.com/",
+      projectId: "monitoringbat-aac5b",
+      storageBucket: "",
+      messagingSenderId: "",
+      appId: ""
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const statusRef = db.ref("Baterai/Status");
+    const teganganRef = db.ref("Baterai/Tegangan");
+
+    statusRef.on("value", (snapshot) => {
+      document.getElementById("status").textContent = snapshot.val();
+    });
+
+    teganganRef.on("value", (snapshot) => {
+      const voltage = parseFloat(snapshot.val());
+      document.getElementById("tegangan").textContent = voltage.toFixed(2);
+
+      const alertBox = document.getElementById("alert");
+      if (voltage < 4.6) {
+        alertBox.classList.remove("hidden");
+      } else {
+        alertBox.classList.add("hidden");
+      }
+    });
+
+    // Dark Mode toggle
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+    }
+  </script>
+</body>
+</html>
